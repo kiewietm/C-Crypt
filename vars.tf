@@ -15,5 +15,5 @@ variable "session_name" {
 }
 
 locals {
-  website_bucket_name = "my-secret-gaurd-${random_pet.suffix.id}"
+  website_bucket_name = "c-crypt-${random_pet.suffix.id}"
 }
