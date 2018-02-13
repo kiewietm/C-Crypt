@@ -14,6 +14,10 @@ variable "session_name" {
   default = ""
 }
 
+variable "origin_name" {
+  default = "ccrypt"
+}
+
 locals {
   website_bucket_name = "c-crypt-${random_pet.suffix.id}"
 }
