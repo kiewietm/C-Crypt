@@ -5,6 +5,11 @@ resource "aws_s3_bucket" "website" {
   acl           = "public-read"
   force_destroy = true
 
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
   policy = <<EOF
 {
   "Version":"2012-10-17",
@@ -17,4 +22,8 @@ resource "aws_s3_bucket" "website" {
   }]
 }
 EOF
+
+  provisioner "local-exec" {
+    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --profile ${var.profile}"
+  }
 }
