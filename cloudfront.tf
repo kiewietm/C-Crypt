@@ -17,6 +17,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "C-Crypt Website"
   default_root_object = "index.html"
 
+  logging_config {
+    include_cookies = false
+    bucket          = "${aws_s3_bucket.logging.id}"
+    prefix          = "${var.log_prefix}"
+  }
+
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]

@@ -5,12 +5,11 @@ resource "aws_s3_bucket" "website" {
   acl           = "private"
   force_destroy = true
 
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
+  logging {
+    target_bucket = "${aws_s3_bucket.logging.id}"
+    target_prefix = "${var.log_prefix}"
   }
 
-  #policy = "${data.aws_iam_policy_document.s3_policy.json}"
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -26,7 +25,7 @@ resource "aws_s3_bucket" "website" {
                 "s3:GetObject",
                 "s3:List*"
             ],
-            "Resource": "arn:aws:s3:::c-crypt-close-cicada/*"
+            "Resource": "arn:aws:s3:::${local.website_bucket_name}/*"
         }
     ]
 }
@@ -37,25 +36,23 @@ EOF
   }
 }
 
-#data "aws_iam_policy_document" "s3_policy" {
-#  statement {
-#    actions   = ["s3:GetObject"]
-#    resources = ["arn:aws:s3:::${local.website_bucket_name}/*"]
-#
-#    principals {
-#      type        = "AWS"
-#      identifiers = ["${aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn}"]
-#    }
-#  }
-#
-#  statement {
-#    actions   = ["s3:ListBucket"]
-#    resources = ["arn:aws:s3:::${local.website_bucket_name}"]
-#
-#    principals {
-#      type        = "AWS"
-#      identifiers = ["${aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn}"]
-#    }
-#  }
-#}
+resource "aws_s3_bucket" "logging" {
+  bucket        = "${local.logging_bucket}"
+  acl           = "log-delivery-write"
+  force_destroy = true
 
+  lifecycle_rule {
+    prefix  = "${var.log_prefix}"
+    enabled = true
+
+    transition {
+      days          = 7
+      storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 30
+      storage_class = "GLACIER"
+    }
+  }
+}

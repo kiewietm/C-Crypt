@@ -18,6 +18,11 @@ variable "origin_name" {
   default = "ccrypt"
 }
 
+variable "log_prefix" {
+  default = "log/"
+}
+
 locals {
-  website_bucket_name = "c-crypt-${random_pet.suffix.id}"
+  website_bucket_name = "c-crypt-website-${random_pet.suffix.id}"
+  logging_bucket      = "c-crypt-logging-${random_pet.suffix.id}"
 }
