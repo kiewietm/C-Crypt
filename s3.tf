@@ -56,3 +56,50 @@ resource "aws_s3_bucket" "logging" {
     }
   }
 }
+
+resource "aws_s3_bucket" "secret" {
+  bucket        = "${local.secret_bucket}"
+  acl           = "private"
+  force_destroy = true
+
+  server_side_encryption_configuration {
+    sse_algorithm     = "aws:kms"
+    kms_master_key_id = "${aws_kms_key.secret.arn}"
+  }
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Id": "123",
+    "Statement": [
+      {
+        "Sid": "DenyMFA",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": [
+          "arn:aws:s3:::local.secret_bucket/*", 
+          "arn:aws:s3:::local.secret_bucket"
+        ],
+        "Condition": { "Null": { "aws:MultiFactorAuthAge": true }}
+      },
+      {
+        "Sid": "DenyMFAage",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": [
+          "arn:aws:s3:::local.secret_bucket/*", 
+          "arn:aws:s3:::local.secret_bucket"
+        ],
+        "Condition": {"NumericGreaterThan": {"aws:MultiFactorAuthAge": var.mfa_period }}
+      }
+    ]
+ }
+EOF
+
+  logging {
+    target_bucket = "${aws_s3_bucket.logging.id}"
+    target_prefix = "${var.log_prefix}"
+  }
+}
