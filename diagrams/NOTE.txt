@@ -1,0 +1,15 @@
+Diagram Overview
+===
+High level network diagram detailing the components envolved and their interactions
+with each other.
+
+Drawing Tool
+===
+Website: Draw.io
+Source: *.xml
+
+Versioning
+===
+For each iteration, create a Vx sub-folder that contains the following:
+1) Source xml file
+2) PNG representation of xml file
