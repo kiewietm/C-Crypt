@@ -67,36 +67,7 @@ resource "aws_s3_bucket" "secret" {
     kms_master_key_id = "${aws_kms_key.secret.arn}"
   }
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Id": "123",
-    "Statement": [
-      {
-        "Sid": "DenyMFA",
-        "Effect": "Deny",
-        "Principal": "*",
-        "Action": "s3:*",
-        "Resource": [
-          "arn:aws:s3:::local.secret_bucket/*", 
-          "arn:aws:s3:::local.secret_bucket"
-        ],
-        "Condition": { "Null": { "aws:MultiFactorAuthAge": true }}
-      },
-      {
-        "Sid": "DenyMFAage",
-        "Effect": "Deny",
-        "Principal": "*",
-        "Action": "s3:*",
-        "Resource": [
-          "arn:aws:s3:::local.secret_bucket/*", 
-          "arn:aws:s3:::local.secret_bucket"
-        ],
-        "Condition": {"NumericGreaterThan": {"aws:MultiFactorAuthAge": var.mfa_period }}
-      }
-    ]
- }
-EOF
+  policy = "${data.template_file.secret_bucket.rendered}"
 
   logging {
     target_bucket = "${aws_s3_bucket.logging.id}"
