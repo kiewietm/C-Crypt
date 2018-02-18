@@ -11,15 +11,15 @@ resource "aws_iam_role" "rsa" {
         "Service": "lambda.amazonaws.com"
       },
       "Effect": "Allow",
-      "Sid": "RSA Lambda"
+      "Sid": "rsaLambda"
     }
   ]
 }
 EOF
 }
 
-resource "aws_iam_role_policy" "test_policy" {
-  name = "test_policy"
+resource "aws_iam_role_policy" "rsa" {
+  name = "c-crypt-rsa-lambda"
   role = "${aws_iam_role.rsa.id}"
 
   policy = <<EOF
@@ -28,6 +28,7 @@ resource "aws_iam_role_policy" "test_policy" {
   "Statement": [
     {
       "Action": [
+        "ec2:CreateNetworkInterface",
         "kms:*",
         "sts:*",
         "s3:*"

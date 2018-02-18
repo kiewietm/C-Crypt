@@ -14,7 +14,7 @@ resource "aws_security_group" "rsa_lambda" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    prefix_list_ids = ["${data.aws_vpc_endpoint.s3.id}"]
+    prefix_list_ids = ["${aws_vpc_endpoint.s3.prefix_list_id}"]
   }
 
   tags = "${merge(

@@ -26,6 +26,17 @@ resource "aws_s3_bucket" "website" {
                 "s3:List*"
             ],
             "Resource": "arn:aws:s3:::${local.website_bucket_name}/*"
+        },
+        {
+          "Sid": "Allow Root Upload",
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "${data.aws_caller_identity.current.user_id}"
+          },
+          "Action": [
+            "s3:PutObject"
+          ],
+          "Resource": "arn:aws:s3:::${local.website_bucket_name}/*"
         }
     ]
 }
@@ -46,12 +57,12 @@ resource "aws_s3_bucket" "logging" {
     enabled = true
 
     transition {
-      days          = 7
+      days          = 30
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 30
+      days          = 60
       storage_class = "GLACIER"
     }
   }
@@ -71,7 +82,8 @@ resource "aws_s3_bucket" "secret" {
     }
   }
 
-  policy = "${data.template_file.secret_bucket.rendered}"
+  #Fix: creating indestructible buckets
+  #policy = "${data.template_file.secret_bucket.rendered}"
 
   logging {
     target_bucket = "${aws_s3_bucket.logging.id}"
