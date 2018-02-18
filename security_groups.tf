@@ -1,5 +1,5 @@
 resource "aws_security_group" "rsa_lambda" {
-  name        = "c_crypt_rsa_lambda"
+  name        = "c-crypt-rsa-lambda"
   description = "Allow HTTPS and S3 endpoint"
   vpc_id      = "${aws_vpc.c_crypt.id}"
 
@@ -17,7 +17,8 @@ resource "aws_security_group" "rsa_lambda" {
     prefix_list_ids = ["${data.aws_vpc_endpoint.s3.id}"]
   }
 
-  tags {
-    Name = "c-crypt rsa lambda"
-  }
+  tags = "${merge(
+            local.common_tags,
+            map("Name", "c-crypt rsa lambda")
+          )}"
 }

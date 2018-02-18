@@ -61,7 +61,7 @@ resource "aws_lambda_function" "rsa" {
   kms_key_arn = "${aws_kms_key.secret.arn}"
 
   vpc_config {
-    subnet_ids         = ["${aws_subnet.private.*.id}"]
+    subnet_ids         = ["${aws_subnet.https-gateway.*.id}"]
     security_group_ids = ["${aws_security_group.rsa_lambda.id}"]
   }
 }

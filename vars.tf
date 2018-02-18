@@ -2,7 +2,7 @@ variable "az_count" {
   default = "2"
 }
 
-variable "private_subnet_cidrs" {
+variable "https_subnet_cidrs" {
   type    = "list"
   default = ["10.0.0.0/25", "10.0.0.128/25"]
 }
@@ -21,12 +21,10 @@ variable "profile" {
 
 variable "role_arn" {
   description = "Cross-account role arn (valid value=\"\")"
-  default     = ""
 }
 
 variable "session_name" {
   description = "Session name used when assuming roles (valid value=\"\")"
-  default     = ""
 }
 
 variable "origin_name" {

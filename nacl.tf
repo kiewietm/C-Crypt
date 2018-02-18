@@ -1,6 +1,11 @@
 resource "aws_default_network_acl" "default" {
   default_network_acl_id = "${aws_vpc.c_crypt.default_network_acl_id}"
 
+  tags = "${merge(
+            local.common_tags,
+            map("Name", "c-crypt default")
+          )}"
+
   ingress {
     protocol   = "tcp"
     rule_no    = 100

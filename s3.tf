@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "website" {
             "Sid": " Grant a CloudFront Origin Identity access to support private content",
             "Effect": "Allow",
             "Principal": {
-                "CanonicalUser": "${aws_cloudfront_origin_access_identity.origin_access_identity.s3_canonical_user_id}"
+                "CanonicalUser": "${aws_cloudfront_origin_access_identity.website.s3_canonical_user_id}"
             },
             "Action": [
                 "s3:GetObject",
@@ -63,8 +63,12 @@ resource "aws_s3_bucket" "secret" {
   force_destroy = true
 
   server_side_encryption_configuration {
-    sse_algorithm     = "aws:kms"
-    kms_master_key_id = "${aws_kms_key.secret.arn}"
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = "${aws_kms_key.secret.arn}"
+      }
+    }
   }
 
   policy = "${data.template_file.secret_bucket.rendered}"
