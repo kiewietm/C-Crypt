@@ -1,14 +1,14 @@
-resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+resource "aws_cloudfront_origin_access_identity" "website" {
   comment = "C-Crypt Website"
 }
 
-resource "aws_cloudfront_distribution" "s3_distribution" {
+resource "aws_cloudfront_distribution" "website" {
   origin {
     domain_name = "${aws_s3_bucket.website.bucket_domain_name}"
     origin_id   = "${var.origin_name}"
 
     s3_origin_config {
-      origin_access_identity = "${aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path}"
+      origin_access_identity = "${aws_cloudfront_origin_access_identity.website.cloudfront_access_identity_path}"
     }
   }
 
@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   logging_config {
     include_cookies = false
-    bucket          = "${aws_s3_bucket.logging.id}"
+    bucket          = "${aws_s3_bucket.logging.id}.s3.amazonaws.com"
     prefix          = "${var.log_prefix}"
   }
 
@@ -54,4 +54,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       locations        = []
     }
   }
+
+  tags = "${merge(
+            local.common_tags,
+            map("Name", "c-crypt website ${count.index}")
+          )}"
 }

@@ -1,29 +1,54 @@
+variable "az_count" {
+  description = "Number of AZs to deploy Lambdas in"
+  default     = "2"
+}
+
+variable "https_subnet_cidrs" {
+  description = "Subnet Cidrs for HTTPS traffic only"
+  type        = "list"
+  default     = ["10.0.0.0/25", "10.0.0.128/25"]
+}
+
+variable "vpc_cidr" {
+  default = "10.0.0.0/24"
+}
+
 variable "region" {
-  default = "eu-west-1"
+  description = "VPC CIDr range"
+  default     = "eu-west-1"
 }
 
 variable "profile" {
-  default = "default"
+  description = "Profile used to deploy resources / assume cross-account role"
+  default     = "default"
+}
+
+variable "s3_profile" {
+  description = "Profile of account where S3 website will be deployed"
+  default     = "default"
 }
 
 variable "role_arn" {
-  default = ""
+  description = "Cross-account role arn (valid value=\"\")"
 }
 
 variable "session_name" {
-  default = ""
+  description = "Session name used when assuming roles (valid value=\"\")"
 }
 
 variable "origin_name" {
-  default = "ccrypt"
+  description = "Name used by OAI CloudFront"
+  default     = "ccrypt"
 }
 
 variable "log_prefix" {
-  default = "log/"
+  description = "S3 location where to store logs"
+  default     = "log/"
 }
 
 variable "mfa_period" {
-  default = "5"
+  description = "Time in Seconds that MFA will be valid for"
+  default     = "5"
 }
 
 locals {

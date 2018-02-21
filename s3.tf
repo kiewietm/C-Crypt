@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "website" {
             "Sid": " Grant a CloudFront Origin Identity access to support private content",
             "Effect": "Allow",
             "Principal": {
-                "CanonicalUser": "${aws_cloudfront_origin_access_identity.origin_access_identity.s3_canonical_user_id}"
+                "CanonicalUser": "${aws_cloudfront_origin_access_identity.website.s3_canonical_user_id}"
             },
             "Action": [
                 "s3:GetObject",
@@ -32,7 +32,7 @@ resource "aws_s3_bucket" "website" {
 EOF
 
   provisioner "local-exec" {
-    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.profile}"
+    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.s3_profile}"
   }
 }
 
@@ -46,12 +46,12 @@ resource "aws_s3_bucket" "logging" {
     enabled = true
 
     transition {
-      days          = 7
+      days          = 30
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 30
+      days          = 60
       storage_class = "GLACIER"
     }
   }
@@ -63,40 +63,16 @@ resource "aws_s3_bucket" "secret" {
   force_destroy = true
 
   server_side_encryption_configuration {
-    sse_algorithm     = "aws:kms"
-    kms_master_key_id = "${aws_kms_key.secret.arn}"
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = "${aws_kms_key.secret.arn}"
+      }
+    }
   }
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Id": "123",
-    "Statement": [
-      {
-        "Sid": "DenyMFA",
-        "Effect": "Deny",
-        "Principal": "*",
-        "Action": "s3:*",
-        "Resource": [
-          "arn:aws:s3:::local.secret_bucket/*", 
-          "arn:aws:s3:::local.secret_bucket"
-        ],
-        "Condition": { "Null": { "aws:MultiFactorAuthAge": true }}
-      },
-      {
-        "Sid": "DenyMFAage",
-        "Effect": "Deny",
-        "Principal": "*",
-        "Action": "s3:*",
-        "Resource": [
-          "arn:aws:s3:::local.secret_bucket/*", 
-          "arn:aws:s3:::local.secret_bucket"
-        ],
-        "Condition": {"NumericGreaterThan": {"aws:MultiFactorAuthAge": var.mfa_period }}
-      }
-    ]
- }
-EOF
+  #Fix: creating indestructible buckets
+  #policy = "${data.template_file.secret_bucket.rendered}"
 
   logging {
     target_bucket = "${aws_s3_bucket.logging.id}"
