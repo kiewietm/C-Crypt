@@ -26,24 +26,13 @@ resource "aws_s3_bucket" "website" {
                 "s3:List*"
             ],
             "Resource": "arn:aws:s3:::${local.website_bucket_name}/*"
-        },
-        {
-          "Sid": "Allow Root Upload",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "${data.aws_caller_identity.current.user_id}"
-          },
-          "Action": [
-            "s3:PutObject"
-          ],
-          "Resource": "arn:aws:s3:::${local.website_bucket_name}/*"
         }
     ]
 }
 EOF
 
   provisioner "local-exec" {
-    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.profile}"
+    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.s3_profile}"
   }
 }
 

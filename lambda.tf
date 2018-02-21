@@ -29,6 +29,8 @@ resource "aws_iam_role_policy" "rsa" {
     {
       "Action": [
         "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
         "kms:*",
         "sts:*",
         "s3:*"

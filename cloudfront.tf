@@ -19,13 +19,13 @@ resource "aws_cloudfront_distribution" "website" {
 
   logging_config {
     include_cookies = false
-    bucket          = "${aws_s3_bucket.logging.id}"
+    bucket          = "${aws_s3_bucket.logging.id}.s3.amazonaws.com"
     prefix          = "${var.log_prefix}"
   }
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "POST"]
-    cached_methods   = ["GET"]
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
     target_origin_id = "${var.origin_name}"
 
     forwarded_values {
