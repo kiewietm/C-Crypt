@@ -30,13 +30,15 @@ resource "aws_iam_role_policy" "rsa" {
       "Action": [
         "ec2:CreateNetworkInterface",
         "ec2:DescribeNetworkInterfaces",
-        "ec2:DeleteNetworkInterface",
-        "kms:*",
-        "sts:*",
-        "s3:*"
+        "ec2:DeleteNetworkInterface"
       ],
       "Effect": "Allow",
       "Resource": "*"
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "${aws_vpc.c_crypt.cidr_block}"
+        }
+      }
     }
   ]
 }
