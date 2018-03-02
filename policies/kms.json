@@ -1,6 +1,6 @@
 {
     "Version": "2012-10-17",
-    "Id": "${key_id}",
+    "Id": ${key_id},
     "Statement": [
            {
                    "Sid": "Allow access for Key Administrators",

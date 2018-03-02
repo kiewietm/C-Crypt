@@ -1,5 +1,5 @@
-resource "aws_iam_role" "rsa" {
-  name = "c-crypt-rsa-lamda"
+resource "aws_iam_role" "aes" {
+  name = "c-crypt-aes-lamda"
 
   assume_role_policy = <<EOF
 {
@@ -11,16 +11,16 @@ resource "aws_iam_role" "rsa" {
         "Service": "lambda.amazonaws.com"
       },
       "Effect": "Allow",
-      "Sid": "rsaLambda"
+      "Sid": "aesLambda"
     }
   ]
 }
 EOF
 }
 
-resource "aws_iam_role_policy" "rsa" {
-  name = "c-crypt-rsa-lambda"
-  role = "${aws_iam_role.rsa.id}"
+resource "aws_iam_role_policy" "aes" {
+  name = "c-crypt-aes-lambda"
+  role = "${aws_iam_role.aes.id}"
 
   policy = <<EOF
 {
@@ -28,45 +28,36 @@ resource "aws_iam_role_policy" "rsa" {
   "Statement": [
     {
       "Action": [
-        "ec2:CreateNetworkInterface",
-        "ec2:DescribeNetworkInterfaces",
-        "ec2:DeleteNetworkInterface"
+        "ssm:CreateDocument",
+        "ssm:DescribeDocument",
+        "ssm:GetDocument",
+        "ssm:UpdateDocument"
       ],
       "Effect": "Allow",
       "Resource": "*"
-      "Condition": {
-        "IpAddress": {
-          "aws:SourceIp": "${aws_vpc.c_crypt.cidr_block}"
-        }
-      }
     }
   ]
 }
 EOF
 }
 
-variable "rsa_zip_name" {
-  default = "generate_rsa"
+variable "aes_zip_name" {
+  default = "generate_aes"
 }
 
-data "archive_file" "rsa_lambda" {
+data "archive_file" "aes_lambda" {
   type        = "zip"
-  source_file = "./lambda/generate_rsa.py"
-  output_path = "./generate_rsa.zip"
+  source_file = "./lambda/generate_aes.py"
+  output_path = "./generate_aes.zip"
 }
 
-resource "aws_lambda_function" "rsa" {
-  filename         = "${var.rsa_zip_name}.${data.archive_file.rsa_lambda.type}"
-  function_name    = "c-crypt-rsa"
-  role             = "${aws_iam_role.rsa.arn}"
-  handler          = "${var.rsa_zip_name}.my_handler"
-  source_code_hash = "${base64sha256(file("${data.archive_file.rsa_lambda.output_path}"))}"
+resource "aws_lambda_function" "aes" {
+  filename         = "${var.aes_zip_name}.${data.archive_file.aes_lambda.type}"
+  function_name    = "c-crypt-aes"
+  role             = "${aws_iam_role.aes.arn}"
+  handler          = "${var.aes_zip_name}.my_handler"
+  source_code_hash = "${base64sha256(file("${data.archive_file.aes_lambda.output_path}"))}"
   runtime          = "python3.6"
 
   kms_key_arn = "${aws_kms_key.secret.arn}"
-
-  vpc_config {
-    subnet_ids         = ["${aws_subnet.https-gateway.*.id}"]
-    security_group_ids = ["${aws_security_group.rsa_lambda.id}"]
-  }
 }
