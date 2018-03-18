@@ -16,11 +16,12 @@ def get_default_ssm_kms(kms_client):
         keys = kms_client.list_keys()
         return keys['Keys'][]
     '''
-
     return "arn:aws:kms:eu-west-1:931486170612:key/08cd5b04-bf09-49a6-9116-ade5d4c2f6d0"
 
 def pad(s):
+    BS = 16
     #return s + (AES_BLOCK_SIZE - len(s) % AES_BLOCK_SIZE) * chr(AES_BLOCK_SIZE - len(s) % AES_BLOCK_SIZE)
+    return s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
     pad_length = 32 - len(s)
     print("PAD LENGTH = ", pad_length)
     #return s + HMAC.new(str(s).encode('utf-8'), None, SHA256).hexdigest()[:pad_length]
@@ -38,19 +39,22 @@ def encrypt(secret, signature, key):
     hmac_key = HMAC.new(str(key).encode('utf-8'), None, SHA256)
     print("HMAC KEY = ", hmac_key.hexdigest())
     cipher = AES.new(hmac_key.digest(), AES.MODE_CBC, iv)
-    print("Encrypted SECRET", cipher.encrypt(padded_secret))
-    #return base64.b64encode(cipher.encrypt(padded_secret))
-    return cipher.encrypt(hmac_key.hexdigest()[:16])
+    print("DIGEST = ", hmac_key.digest())
+    #print("Encrypted SECRET", cipher.encrypt(padded_secret))
+    return cipher.encrypt(padded_secret)
 
 def decrypt(encrypted_message, signature, key):
-    #encrypted_message = base64.b64decode(encrypted_message)
+    encrypted_message = encrypted_message
     print("ENCRYPTED MESSAGE =", encrypted_message)
     iv = HMAC.new(str(signature).encode('utf-8'), None, SHA256).hexdigest()[:IV_LENGTH]
     print("IV = ", iv)
-    hmac_key = HMAC.new(str(key).encode('utf-8'), None, SHA256).hexdigest()
-    print("HMAC KEY = ", hmac_key)
-    cipher = AES.new(hmac_key, AES.MODE_CBC, iv)
+    hmac_key = HMAC.new(str(key).encode('utf-8'), None, SHA256)
+    print("HMAC KEY = ", hmac_key.hexdigest())
+    cipher = AES.new(hmac_key.digest(), AES.MODE_CBC, iv)
+    print("DIGEST = ", hmac_key.digest())
+    #return unpad(cipher.decrypt(encrypted_message))
     return cipher.decrypt(encrypted_message)
+
 
 def my_handler(event, context):
     ssm_client = boto3.client('ssm')
@@ -58,6 +62,12 @@ def my_handler(event, context):
     parameter_name = "c-crypt-test"
     encryption_response = encrypt("mySuperSecret", "AOBFX3DFGHZ", "753951Password!")
     response='None'
+    
+    response = decrypt(encryption_response,"AOBFX3DFGHZ", "753951Password!")
+    print("response = ", response)
+    print("RESPONCE = ",unpad(response))
+
+
     '''   
     try:
         put_response = ssm_client.put_parameter(
@@ -84,9 +94,6 @@ def my_handler(event, context):
     
     response = get_response['Parameter']['Value'] + '\n' + put_response + '\n' + delete_response + encryption_response
     '''
-    response = unpad(decrypt(encryption_response,"AOBFX3DFGHZ", "753951Password!"))
-    print("RESPONCE = ",response)
-    
     return { 
         'message' : str(response)
     } 
