@@ -54,5 +54,4 @@ variable "mfa_period" {
 locals {
   website_bucket_name = "c-crypt-website-${random_pet.suffix.id}"
   logging_bucket      = "c-crypt-logging-${random_pet.suffix.id}"
-  secret_bucket       = "c-crypt-secret-${random_pet.suffix.id}"
 }

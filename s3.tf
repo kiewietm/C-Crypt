@@ -56,26 +56,3 @@ resource "aws_s3_bucket" "logging" {
     }
   }
 }
-
-resource "aws_s3_bucket" "secret" {
-  bucket        = "${local.secret_bucket}"
-  acl           = "private"
-  force_destroy = true
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm     = "aws:kms"
-        kms_master_key_id = "${aws_kms_key.secret.arn}"
-      }
-    }
-  }
-
-  #Fix: creating indestructible buckets
-  #policy = "${data.template_file.secret_bucket.rendered}"
-
-  logging {
-    target_bucket = "${aws_s3_bucket.logging.id}"
-    target_prefix = "${var.log_prefix}"
-  }
-}
