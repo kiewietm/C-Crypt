@@ -32,7 +32,7 @@ resource "aws_s3_bucket" "website" {
 EOF
 
   provisioner "local-exec" {
-    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.s3_profile}"
+    command = "aws s3 cp --recursive ./website/ s3://${local.website_bucket_name}/ --acl private --profile ${var.profile}"
   }
 }
 

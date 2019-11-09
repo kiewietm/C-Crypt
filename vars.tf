@@ -23,19 +23,6 @@ variable "profile" {
   default     = "default"
 }
 
-variable "s3_profile" {
-  description = "Profile of account where S3 website will be deployed"
-  default     = "default"
-}
-
-variable "role_arn" {
-  description = "Cross-account role arn (valid value=\"\")"
-}
-
-variable "session_name" {
-  description = "Session name used when assuming roles (valid value=\"\")"
-}
-
 variable "origin_name" {
   description = "Name used by OAI CloudFront"
   default     = "ccrypt"
